@@ -1,0 +1,421 @@
+---
+title: 'Final Project'
+subtitle: "PSTAT122: Design and Analysis of Experiments" 
+bibliography: references.bib
+reference-location: section
+author:
+  - name: "Fall 2025"
+   # affiliations:
+    #  - name: "Fall 2025"
+affiliation-title: "Quarter"
+format: 
+ pdf:
+    code-fold: true
+    code-line-numbers: true
+    code-copy: true
+    code-tools: true
+    self-contained: true
+    toc: false
+    toc-location: left
+    number-sections: true
+    geometry: margin=0.2in
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message =  FALSE)
+knitr::opts_chunk$set(warning =  FALSE)
+knitr::opts_chunk$set(error =  FALSE)
+
+```
+
+
+
+:::callout
+<div style="text-align: center">
+<span style="color: blue;"> **STUDENT NAME **</span> 
+</div>
+- Yanxiu Jin    (yanxiu_jin)
+- Luke Maldonado   (lukemaldonado)
+- Jeff Loomis    (jeffloomis)
+- Erika Nares    (erikanares)
+:::
+
+
+::: {.callout-caution}
+# Due Date
+**Due Date:** Monday, December 8, 2025, 11:59 PM
+:::
+
+
+# Introduction
+The purpose of this experiment is to investigate whether loud background music influences simple reaction time. Our research question is: **Do individuals respond faster or slower to a visual stimulus when loud music is playing compared to silence?**
+
+Reaction time is widely used in psychology and human-performance research as an indicator of attention, processing speed, and readiness. Understanding how auditory stimulation influences reaction time is relevant for everyday activities such as driving, gaming, and working in noisy environments.
+
+Prior research shows that music can influence cognitive processing, though the direction of the effect is not always consistent. High-arousal or cognitively demanding music has been shown to reduce performance on attention and memory tasks compared to silence [@cassidy2007effect], and another study [@unal2013driving] reported that background music increased cognitive load and reduced performance in a simulated driving task. These findings raise the possibility that loud music may interfere with even simple reaction-time performance.
+
+Motivated by these prior results, we designed a controlled randomized complete block experiment in which each participant completed reaction-time trials under both a loud-music condition and a silence condition. This within-subject design isolates the effect of loud music while accounting for natural individual differences.
+
+# Experimental Design
+## Factors and treatment structure
+Our experiment investigated whether loud background music affects simple reaction time. The experiment included one fixed factor, Condition, with two treatment levels: Loud Music and Silence. For the loud music condition, we chose “Flight of the Bumblebee” by Nikolai Rimsky-Korsakov because it is a high-intensity, complex piece that is cognitively demanding, providing a clear contrast to the silence condition. Each participant received both treatment levels.    
+
+## Measurements and Units
+The response variable was simple reaction time, measured in milliseconds (ms) using the Human Benchmark Reaction Time Test. The test recorded how quickly participants clicked when the color on their screen changed from red to green. 
+
+## Fixed and Random Factors
+Condition was treated as a fixed factor because its two levels (Loud Music vs. Silence) represent the specific treatments of interest. Participants were modeled as a random blocking factor. Because participants represent a random sample from a broader population, participants are not of direct inferential interest. Treating them as a random factor accounts for natural individual variability while allowing the estimated treatment effect to generalize at the population level.
+
+## Design Type
+The design type for our experiment was a Randomized Complete Block Design (RCBD). This design was appropriate because each participant served as a block and received both treatment conditions, allowing for within-subject comparisons that reduces variability due to individual differences. 
+
+## Implementation
+Randomization was implemented by randomizing the order of treatments for each participant. Specifically through randomly assigning half of the participants to complete the experiment first with music followed by silence and the other half experienced the reverse, preventing systematic order effects. 
+
+For replication, each condition was measured across all participants. Additionally, each participant completed five experimental trials per treatment. Averaging out the results to produce one response per participant per condition helped reduce error and increase accuracy of the measured reaction times. 
+
+For blocking, participants formed blocks. This allowed us to control for variability between participants, which means Loud Music and Silence were compared within each individual rather than across different people.
+
+
+The sample size for our experiment was 18. To determine this, we performed a power analysis using the effect size from a previous study [@farrell2021effect] that analyzed simple reaction time under Loud Music and Silence conditions. Although our experimental conditions differed, the prior study provided a reference for estimating effect size. The power analysis indicated that at least 15 participants were needed to achieve 80% power for detecting a paired difference at α = 0.05. Because our experiment was fairly straightforward to implement, we increased the sample size to 18 participants to improve accuracy in our final results.
+```{r}
+library(pwr)
+
+# Previous study components
+n_study <- 20
+mean_difference <- 36.63  # (Difference b|n 0dB and 74dB)
+df_study <- n_study - 1
+p_value_study <- 0.002 
+
+t_value_study <- qt( p_value_study/2 , df_study , lower.tail = FALSE )
+
+
+# Calculating Standard Deviation
+SD_D <- (mean_difference * sqrt(n_study)) / t_value_study
+SD_D  # 45.76586
+
+power_result <- pwr.t.test(d = mean_difference / SD_D, 
+                           power = 0.8, 
+                           sig.level = 0.05, 
+                           type = "paired", 
+                           alternative = "two.sided")
+power_result # 14.29127
+
+```
+
+
+
+# Data Collection
+
+## Procedure 
+Our experiment which focuses on the relationship between human reaction time and loud background music was conducted usuing a variety of specifications. Firstly, the experiment was conducted in different locations using an online reaction time measurment website (https://humanbenchmark.com/tests/reactiontime) and a modern piano rendition of "Flight of the Bumblebee" from YouTube (https://youtu.be/M93qXQWaBdE?si=5r1ALkZ1AOeAU0mk). In addition, in order to reduce external variability, we all made sure to perform our experiments between the hours of 7PM to 9PM mostly on Thursday November 27, 2025 but some on Wednesday November 26, 2025. For further standardization, we made sure that participants completed the test on a mobile phone running Google Chrome, positioned approximately 40 cm (15.748 in) from the participant's face in a brightly lit room.
+
+Within the experiment, we asked each participant to complete five warm-up trials without music to understand how the benchmark worked.
+By familiarizing participants with the interface, the trials can help reduce the common slow-start bias observed in reaction-time tasks. Warm-up data were not included in the analysis.
+
+After the warm-up, participants completed ten experimental trials divided into two treatment conditions: Loud Music and Silence. Each treatment condition consisted of five trials, and the order of the treatment conditions was randomized for each participant (either Music → Silence or Silence → Music). During the Loud Music condition, participants listened to a loudly played modern piano rendition of Flight of the Bumblebee via YouTube. In the Silence condition, no audio was played.
+
+To maintain consistent testing conditions, all ten trials were collected continuously in one session without breaks. For each participant, the five trials within each condition were later averaged to produce a single reaction-time measurement for Loud Music and for Silence to perform our statistics on.
+
+
+## Challenges/Adjustments
+In the experiment, we did make it a point to cover as many sources of error variation as possible but given the nature of our project, we did run into some issues along the way. The most immediate issue was the date range in which the experiment was conducted. We conducted our experiment on the days of November 26 to November 27 which is the day before and the day of thanksgiving in the United States. With this, we were unable to meet in person, and each team member instead collected data independently from a few friends. This introduced unavoidable variation in measurement environments across participants.
+
+One major challenge is device variability. Each of the team member used different mobile phones, which can differ in screen size, brightness, touch sensitivity, and input latency. Moreover, although we put the phone at approximately 40 cm from their face, this distance likely fluctuated naturally over the course of the session as participants adjusted their posture. 
+
+In addition, there were limitations in how well we could control the timing between trials. At the beginning of the experiment, participants were instructed that after completing one trial, they should immediately tap to start the next trial and continue in this manner until all ten trials were finished. This procedure ensured that the experiment ran in a single continuous session, but it also meant that the short intervals between trials were self-paced rather than strictly controlled. Some participants may have initiated the next trial almost instantly, while others may have taken slightly longer. Even within the same participant, the inter-trial intervals were not perfectly consistent across all the trials. These variations in timing could introduce additional variability in attention, readiness, or task engagement.
+
+We also faced challenges with audio and environmental standardization. While the piece Flight of the Bumblebee was used consistently, the playback devices and setups varied: some experimenters used laptops, others relied on phone speakers, and the volume level and speaker quality were not perfectly matched across households. The relative position of the audio source to the participant also differed. Similarly, although we instructed that the room should be “bright,” we each had different ideas of a "bright" room so we each had different light levels in the room.
+
+## Data Presentation
+```{r, echo=FALSE}
+library(knitr)
+df <- read.csv("reaction_times_short.csv")
+df2 <- read.csv("reaction_times_long.csv")
+
+#splitting the df table to make it more readable and adding an average column.
+df_music <- df[, c('Subject', 'm1', 'm2', 'm3', 'm4', 'm5')]
+df_silence <- df[, c('Subject', 's1', 's2', 's3', 's4', 's5')]
+
+df_music$Average <- rowMeans(df_music[, -1])
+df_silence$Average <- rowMeans(df_silence[, -1])
+
+#df_music
+#df_silence
+#df2
+
+knitr::kable(
+  df_music,
+  col.names = c('Subject', 'music 1', 'music 2', 'music 3', 'music 4', 'music 5', 'Average'),
+  caption = "Raw data after recording for Loud Music trials"
+)
+
+knitr::kable(
+  df_silence,
+  col.names = c('Subject', 'silence 1', 'silence 2', 'silence 3', 'silence 4', 'silence 5', 'Average'),
+  caption = "Raw data after recording for Silence trials"
+)
+
+```
+
+```{r}
+library(dplyr)
+
+df_long <- read.csv("reaction_times_long.csv")
+
+summary_stats <- df_long %>%
+  group_by(treatment) %>%
+  summarize(
+    Mean = round(mean(rt), 2),
+    SD   = round(sd(rt), 2),
+    .groups = "drop"
+  )
+
+kable(
+  summary_stats,
+  caption = "Table 3: Summary of Mean and Standard Deviation by Condition"
+)
+
+
+```
+
+# Analysis
+```{r}
+#| echo: false
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(tidyr)
+
+df <- read.csv("reaction_times_long.csv")
+```
+
+## Exploratory Data Analysis 
+
+Participants’ reaction times were summarized for each experimental condition to provide an initial overview of performance. Table 3 reports the mean and standard deviation of reaction times across the Loud Music and Silence conditions. On average, participants responded faster in the Silence condition (M = 294.96 ms) compared to the Loud Music condition (M = 308.20 ms). Variability was also somewhat higher in the Loud Music condition (SD = 48.93 ms) than in the Silence condition (SD = 40.63 ms).
+
+
+**Histogram of Reaction Times**
+
+To further examine the distributional characteristics of the reaction time data,
+we plotted histograms for each condition. These visualizations provide insight
+into the overall shape of the data and help identify potential deviations from
+normality. Across both the Silence and Loud Music conditions, the distributions
+appear fairly close to normal, with a smooth unimodal shape. While a few
+outliers are present, they do not appear numerous enough to substantially
+distort the overall distribution, supporting the use of RCBD ANOVA in the
+subsequent analysis.  
+&nbsp;
+
+```{r}
+#| echo: true
+#| fig-width: 6
+#| fig-height: 4.5
+library(ggplot2)
+
+ggplot(df, aes(x = rt, fill = treatment)) +
+  geom_histogram(alpha = 0.6, bins = 20, position = "identity") +
+  facet_wrap(~ treatment) +
+  labs(
+    title = "Distribution of Reaction Times by Condition",
+    x = "Reaction Time (ms)",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+**Boxplots of Reaction Times by Condition**
+
+The boxplots display the distribution of reaction times for each condition. The
+music condition shows a slightly wider spread in reaction times, and the median
+values for Loud Music and Silence appear similar. The Loud Music condition also includes a
+few higher outliers compared to the Silence condition.  
+&nbsp;
+
+```{r}
+#| echo: true
+
+ggplot(df, aes(x = treatment, y = rt, fill = treatment)) +
+geom_boxplot(alpha = 0.7) +
+labs(
+title = "Reaction Times by Condition",
+x = "Condition",
+y = "Reaction Time (ms)"
+) +
+theme_minimal() +
+theme(legend.position = "none")
+```  
+&nbsp;
+
+**Subject-Level Mean Reaction Times**
+
+The subject-level mean plot displays one line per participant, connecting each
+individual’s average reaction time in the Loud Music and Silence conditions. The
+figure shows a mixture of patterns: many subjects exhibit only slight changes
+between conditions, with lines that shift modestly upward or downward, while a
+few subjects display more pronounced differences. The overall collection of
+lines naturally produces some crisscrossing, and there is no visibly clear pattern.  
+&nbsp;
+
+```{r}
+#| echo: true
+
+# Compute means per subject per condition
+subject_means <- df %>%
+  group_by(Subject, treatment) %>%
+  summarize(mean_rt = mean(rt), .groups = "drop")
+
+# Line plot showing each subject's pattern
+ggplot(subject_means, aes(x = treatment, y = mean_rt, group = Subject)) +
+  geom_line(alpha = 0.4) +
+  geom_point(size = 2) +
+  labs(
+    title = "Individual Subject Mean Reaction Times",
+    x = "Condition",
+    y = "Mean Reaction Time (ms)"
+  ) +
+  theme_minimal()
+```
+
+
+## Hypothesis Testing
+
+Following the exploratory analysis, we conducted a formal statistical test to
+determine whether reaction times differed between the Silence and Loud Music
+conditions. Because each participant completed both conditions, the study
+follows a randomized complete block design (RCBD) in which subjects serve as
+blocks. This approach accounts for participant-to-participant variability by
+treating individual differences as a block effect, thereby isolating the
+treatment effect of interest. The hypothesis for the RCBD analysis can be
+expressed as
+
+$$ H_0: \tau_{\text{silence}} = \tau_{\text{music}} \;\; \text{vs} \;\; H_A: \tau_{\text{silence}} \ne \tau_{\text{music}} $$
+
+where $\tau_{\text{silence}}$ and $\tau_{\text{music}}$ represent the treatment
+effects associated with the Silence and Loud Music conditions, respectively. The
+RCBD ANOVA evaluates whether these treatment effects differ after accounting for
+subject-level blocking.
+
+## ANOVA Results
+
+The ANOVA table is presented below.
+
+
+
+```{r}
+#| echo: true
+subject_means$Subject <- factor(subject_means$Subject)
+fit <- aov(mean_rt ~ treatment + Subject, data = subject_means)
+anova_table <- anova(fit)
+kable(
+  anova_table,
+  digits = 4,
+  caption = "ANOVA Table for RCBD (Subjects as Blocks)"
+)
+```  
+
+The RCBD ANOVA tested whether reaction times differed between the Silence and
+Loud Music conditions. The analysis showed that the effect of treatment was not
+statistically significant, $F(1, 33) = 2.41$, $p =  0.1390$. Because the
+result was not significant, we fail to reject the null hypothesis. Based on the
+averaged reaction times for each participant, there was no reliable evidence of
+a difference in reaction times between the Silence and Loud Music conditions.
+
+**Model Assumptions**
+
+After fitting the RCBD ANOVA model, we first examined the normal QQ plot of the
+residuals to assess whether the normality assumption was reasonably satisfied.
+In this case, the points follow the line fairly closely, suggesting that the
+residuals do not deviate strongly from normality.
+
+
+```{r}
+#| echo: true
+residuals_rt <- residuals(fit)
+
+qqnorm(residuals_rt)
+qqline(residuals_rt)
+```
+
+We also conducted the Shapiro–Wilk test to provide a numerical check of the
+normality assumption. The test yielded a statistic of $W = 0.9698$ with a
+$p$-value of $0.4203$, and because the $p$-value exceeds the 0.05 threshold, we
+fail to reject the null hypothesis of normality. This result is consistent with
+the visual impression from the QQ plot.
+
+```{r}
+#| echo: true
+
+# Run Shapiro–Wilk test on ANOVA residuals
+shap <- shapiro.test(residuals_rt)
+
+# Convert to a tidy data frame for kable
+shap_df <- data.frame(
+  Statistic = shap$statistic,
+  p_value   = shap$p.value
+)
+
+kable(
+  shap_df,
+  digits = 4,
+  caption = "Shapiro–Wilk Normality Test for ANOVA Residuals"
+)
+```
+
+To assess homoscedasticity, we examined the residuals versus fitted values plot.
+The residuals appear to be spread out fairly evenly across the range of fitted
+values, with no obvious funneling or systematic pattern. This suggests that the
+assumption of constant variance is reasonably satisfied for the RCBD ANOVA
+model.
+
+
+```{r}
+#| echo: true
+fitted_rt <- fitted(fit)
+
+plot(fitted_rt, residuals_rt,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted")
+abline(h = 0, lty = 2)
+```
+
+**Analysis summary**
+
+In summary, the exploratory analyses provided an overview of the reaction time
+distributions and subject-level patterns across the two conditions. A formal
+hypothesis test was then conducted using an RCBD ANOVA to evaluate whether
+reaction times differed between silence and music. The ANOVA indicated that the
+treatment effect was not statistically significant, and the assumption checks
+based on residual diagnostics showed no substantial departures from normality or
+homoscedasticity. Overall, the results do not provide evidence of a difference
+in reaction times between the two conditions.
+
+Although participants serve as random blocks conceptually, the RCBD analysis in this project was conducted using a standard fixed-effects ANOVA model. In balanced RCBD designs, this approach yields the same treatment inference as a mixed-effects model with a random block effect. The following code proves the statisitical equivalence by giving Its t-statistic of −1.553 corresponds to an F-statistic of 2.41, exactly matching the treatment F-value obtained from the RCBD ANOVA table.
+
+```{r}
+df_long <- read.csv("reaction_times_long.csv")
+
+subject_means <- df_long %>%
+  group_by(Subject, treatment) %>%
+  summarize(mean_rt = mean(rt), .groups = "drop")
+
+subject_means$Subject <- factor(subject_means$Subject)
+library(lme4)
+m <- lmer(mean_rt ~ treatment + (1 | Subject), data = subject_means)
+summary(m)
+
+(-1.553)^2
+
+```
+
+# Conclusions
+The goal of this experiment was to determine whether loud background music affects simple reaction time compared to silence condition. Using an RCBD in which each participant completed both conditions, we found no statistically significant difference between Loud Music and Silence. Although the mean reaction times were slightly slower under loud music, this difference was not large enough to be meaningful. Assumption checks and a mixed-effects model confirmed the same conclusion.
+
+Several limitations of the experiment may have introduced additional variability into the reaction-time measurements. Because data were collected individually, testing environments differed across participants. Device differences, small fluctuations in viewing distance, inconsistent inter-trial timing, and non-standardized audio and lighting conditions all added noise to the measurements. These uncontrolled factors may have diluted the true treatment effect, making it harder to detect. As a result, even though the sample size was informed by a power analysis, the actual effect size under our conditions may have been smaller than anticipated, reducing the effective statistical power of the study.
+
+Future studies could benefit from a more controlled laboratory environment, standardized devices, controlled audio setting, consistent lighting, and automated timing between trials. Increasing the number of trials per condition or collecting more participants could also improve precision.
+Additionally, exploring other types of music (e.g., varying tempo, complexity, or genre) or including a low-volume condition may provide a more nuanced understanding of how auditory stimulation affects reaction-time performance.
+
+# References
+
