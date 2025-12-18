@@ -1,0 +1,288 @@
+---
+title: "126 Final Project"
+author: "Luke Maldonado"
+date: "2025/12/04"
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+# Part 1: Data Description and Descriptive Statistics
+\
+```{r, message=FALSE}
+library(car)
+library(tidyr)
+library(knitr)
+library(carData)
+library(ggplot2)
+library(tidyverse)
+library(kableExtra)
+```
+
+#### Loading in the data itself
+\
+```{r, fig.show='hold'}
+raw_df <- read.csv("Diamonds Prices2022.csv")
+raw_df <- raw_df[, -1]
+# Will reuse this code to make the tables i display look better
+table <- kable(head(raw_df), format = "latex", caption = "Base Data")
+#ensures that the table is displayed 
+kable_styling(table, latex_options = "HOLD_position")
+```
+
+## 1.
+\
+```{r, fig.show='hold'}
+#Setting the seed to 1234 for reproducibility. 
+set.seed(1234)
+#Randomly sampling half of the data set.
+df <- raw_df[sample(nrow(raw_df), (nrow(raw_df))),]
+rownames(df) <- 1:nrow(df) #resetting the indexes.
+table <- kable(head(df), format = "latex", caption = "Base Data")
+kable_styling(table, latex_options = "HOLD_position")
+```
+
+## 2.
+\
+```{r, fig.show='hold'}
+summary(df)
+```
+
+#### creating histograms with the quantitative continuous variables, all plots separated for knitting.
+\
+```{r, fig.show='hold', warning=FALSE}
+continuous_df <- df[, -(2:4)]
+ggplot(continuous_df, aes(continuous_df[, 1])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[1], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 2])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[2], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 3])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[3], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 4])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[4], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 5])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[5], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 6])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[6], y = "Frequency")
+```
+
+```{r, fig.show='hold'}
+ggplot(continuous_df, aes(continuous_df[, 7])) +
+  geom_histogram(color='darkgreen', fill='white') +
+  labs(x = names(continuous_df)[7], y = "Frequency")
+```
+
+Generally, it seems like almost all of the variables seem relatively clustered around a mean (somewhat normal) with the exception of the carat and the price variable which seem very skewed left.
+
+#### Creating bar plots for the categorial variables
+\
+```{r, fig.show='hold', fig.align='center'}
+categorical_df <- df[, (2:4)]
+
+#putting the categories in order from least "good" to most good.
+#color already in order as it is alphabetical.
+order_cut <- c("Fair", "Good", "Very Good", "Premium", "Ideal")
+order_clarity <- c("I1", "SI2", "SI1", "VS2", "VS1", "VVS2", "VVS1", "IF")
+categorical_df$cut <- factor(categorical_df$cut, levels = order_cut,
+                             ordered = TRUE)
+categorical_df$clarity <- factor(categorical_df$clarity,
+                                 levels = order_clarity, ordered = TRUE)
+
+ggplot(categorical_df, aes(categorical_df[, 1])) +
+  geom_bar(data = categorical_df, color='darkgreen', fill='white') +
+  labs(x = names(categorical_df)[1], y = "Frequency")
+```
+
+```{r, fig.show='hold', fig.align='center'}
+ggplot(categorical_df, aes(categorical_df[, 2])) +
+  geom_bar(data = categorical_df, color='darkgreen', fill='white') +
+  labs(x = names(categorical_df)[2], y = "Frequency")
+```
+
+```{r, fig.show='hold', fig.align='center'}
+ggplot(categorical_df, aes(categorical_df[, 3])) +
+  geom_bar(data = categorical_df, color='darkgreen', fill='white') +
+  labs(x = names(categorical_df)[3], y = "Frequency")
+```
+
+The cut variable seems to be skewed right while both color and clarity seem to be somewhat normal as they cluster around a mean near the center.
+
+## 3.
+\
+```{r, fig.show='hold'}
+model <- lm(price ~ depth + table + carat + color + clarity, data = df)
+vif(model)
+```
+The VIF value for each variable heavily points to low or non-existent multicolinearity (A predictor depending on another one).
+
+## 4.
+\
+```{r, fig.show='hold'}
+summary(model)
+```
+
+## 5.
+\
+The data seemed to behave and follow a distribution I expected. However, the fact that none of the variables have much colinearity at all is somewhat surprising to me as there are definitely some variables I expected to have some relationship.
+
+# Part 2: Simple Linear Regression
+\
+
+## 1 & 2
+\
+```{r, fig.show='hold'}
+carat_mean <- 7756.44
+simple_model <- lm(price ~ carat, data = df)
+print(summary(simple_model))
+print(confint(simple_model))
+ggplot(data = df, aes(x = carat, y = price)) + geom_point() +
+  geom_smooth(method = lm)
+print(predict(simple_model, data.frame(carat = carat_mean), interval = "prediction", level = 0.95))
+```
+
+For the residuals, it seems that most of the actual values are below the estimator. The estimate value for the intercept ($\beta_0$) (the price) is extremely low while the estimate for carat ($\beta_1$) is significantly higher. The model itself and the predictor have a very low P value which suggests that the predictor has a high statistical significance to the model. Given the $R^2_{adj}$ (and the regular $R^2$) the large majority of the total variation is explained with the model. The confidence interval for both the intercept and the carat is very narrow, covering only a difference in upper and lower quantities of 51.176 and 55.140 respectively. The prediction interval is a much wider interval with a difference between the high and low of 427687.
+
+## 3.
+\
+```{r, fig.show='hold'}
+plot(simple_model, which = 1)
+```
+
+from the residuals vs fitted plot, it is clear that the points do not follow a linear distribution.
+\
+To fix this, we first check the residuals vs predictors plot:
+\
+```{r, fig.show='hold'}
+df$residuals <- residuals(simple_model)
+
+ggplot(df, aes(x = carat, y = residuals)) + geom_point() +
+  geom_hline(yintercept = 0, col = "red", lty = 2)
+```
+
+Clearly, the resiudals plotted against the carat show a non linear relationship
+\
+To fix, we try different ways to make the data cluster around the mean more.
+\
+```{r, fig.show='hold'}
+fix_simp_model <- lm(log(price) ~ log(carat), data = df)
+plot(fix_simp_model, which = 1)
+```
+
+After the transformation, the data appears to be much more linear in nature.
+\
+Now, we plot the quantile-quantile plot of residuals:
+\
+```{r, fig.show='hold'}
+plot(fix_simp_model, which = 2)
+```
+
+The Q-Q plot falls within an acceptable visual range of deviation from the mean which suggests normality.
+
+## 4.
+\
+```{r, fig.show='hold'}
+summary(fix_simp_model)
+```
+
+Since P value stays very small and therefore statistically significant, the most notable difference now is the $R^2_{adj}$ and normal $R^2$ which now suggests that the model explains a huge 93.3% of the overall variation in the data.
+
+## 5.
+\
+```{r, include=FALSE, echo=TRUE}
+new_model <- lm(log(price) ~ log(carat) + depth, data = df)
+new_model2 <- lm(log(price) ~ log(carat) + table, data = df)
+new_model3 <- lm(log(price) ~ log(carat) + color, data = df)
+new_model4 <- lm(log(price) ~ log(carat) + clarity, data = df)
+new_model5 <- lm(log(price) ~ log(carat) + color + clarity, data = df)
+
+summary(new_model)
+summary(new_model2)
+summary(new_model3)
+summary(new_model4)
+summary(new_model5)
+```
+
+From the code used to conduct the best possible regression model, the best combination is a model predicting the price based on the the log of carat and the levels of color and clarity which boosts the $R^2_{adj}$ and regular $R^2$ to over 98%.
+
+## 6.
+\
+The most interesting thing I found in this part was just how good of a model that was able to be made. With an $R^2_{adj}$ vlaue of over 98%, the error in the model accounts for under 2% of the total variation. A model of this accuracy is a significant achievement.
+
+# Part 3: Multiple Linear Regression
+\
+
+## 1.
+\
+```{r, fig.show='hold'}
+last_model1 <- lm(log(price) ~ log(carat) + color + clarity + depth, data = df)
+last_model2 <- lm(log(price) ~ log(carat) + color + clarity + table, data = df)
+last_model3 <- lm(log(price) ~ log(carat) + color + clarity + cut, data = df)
+last_model4 <- lm(log(price) ~ log(carat) + color + clarity + x, data = df)
+last_model5 <- lm(log(price) ~ log(carat) + color + clarity + y, data = df)
+last_model6 <- lm(log(price) ~ log(carat) + color + clarity + z, data = df)
+
+
+AIC(last_model1, last_model2, last_model3, last_model4, last_model5, last_model6)
+BIC(last_model1, last_model2, last_model3, last_model4, last_model5, last_model6)
+fin_model <- last_model3
+summary(fin_model)
+```
+
+From this, we are able to see that the best model for predicting the price is a model that includes the log of carat, the color, the clarity, and the cut. Based on the VIF of the model, there appears to be little multicolinearity thus the variables do not depend on each other at all. 
+
+We also must ensure that the assumptions for a linear regression model hold for this particular one. We will check this visually with plots.
+First, we do residuals vs fitted
+
+```{r, fig.show='hold', fig.align='center'}
+plot(fin_model, which = 1)
+```
+
+As expected (since cut is a categorical variable), the model still displays linearity and passes this check. Next, we check the Q-Q plot of the residuals which still should still be a fairly straight line with most points clustered around a given slope.
+
+```{r, fig.show='hold', fig.align='center'}
+plot(fin_model, which = 2)
+```
+
+despite the uneven look of the tails of the plot, the overall shape of it is still highly normal and suggests that the error is normally distributed.
+
+## 2.
+\
+```{r, fig.show='hold'}
+vif(fin_model)
+```
+The VIF values being very close to 1 indicate that the individual coefficients have very low multicolinearity which suggests that none of them are dependent on each other (with makes intuitive sense as the color, cut, clarity, and carat have no affect on each other).
+
+## 3.
+\
+```{r, fig.show='hold'}
+print(confint(fin_model))
+print(predict(fin_model, data.frame(carat = 2, color = "E", clarity = "IF", cut = "Fair"), interval = "prediction", level = 0.95))
+```
+
+All of the confidence intervals for the means are extremely small which indicates that the predictors work very well at giving a statistically sound estimate of the data. Since we must keep in mind that the response has the log taken, the real values of the prediction interval for a 2 carat diamond of the highest clarity, most pristine color, and worst cut that the data set offers is between \$21153.32 and \$35754.81 with an exact value put at \$27501.61.
+
+## 4.
+\
+Throughout this report, we have looked at a data set representing different attributes of a diamond including carat, cut, color, clarity, depth, table, price, x, y, and z. From these predictors, we examined their distribution by checking their summary statistics and generating plots in order to visually analyze their distributions. After this, we chose the price, depth, table, carat, color, clarity variables to make a model from. First, we tested a simple regression model that modeled the price based only off of the carat of the diamond which for being simple had a rather high accuracy. The model was not linear at first but through a logistic transformation, we were able to better display the data as linear and was able to improve upon the model from there. Next, I tested the statistical significance of each of the predictors paired with the log of the carat predictor and found that the color and clarity were the only predictors that increased the accuracy by a relatively significant amount. After making this model, we then tested it along with the other predictors (depth, table, cut, x, y, and z) and used both AIC and BIC to see the most significant addition we could make. From the results of this, it was determined that the most accurate model with the smallest chance of overfitting was a model that predicted the price of a diamond based on the carat, color, clarity, and cut. After determining this, we then checked the multicolinearity of these predictors and also ensured that the final model was still satisfying the assumptions of a linear regression model. Lastly, we checked the confidence interval of the means of the predictors along with the prediction interval where both further reinforced the accuracy of the model.
+
